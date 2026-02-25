@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4 Fotos 1 Palabra</title>
+    <!--Alertas cuando hay nueva version.
+    <script>
+    alert("Hola mundo desde JavaScript!");
+    console.log("El JavaScript se está ejecutando.");
+</script>-->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 8px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 16px);
+        }
+        
+        /* Encabezado compacto */
+        .compact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 6px 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        
+        .game-title {
+            font-size: 1.2rem;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .stats-container {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: #ccc;
+        }
+        
+        .stat-value {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        /* Contenedor de fotos - Reducido */
+        .photos-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        
+        .photo {
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            height: 130px;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .photo:hover img {
+            transform: scale(1.05);
+        }
+        
+        .photo-number {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        /* Área de respuesta */
+        .answer-container {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .answer-display {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 8px 0;
+            min-height: 55px;
+            align-items: center;
+        }
+        
+        .letter-box {
+            min-width: 35px;
+            height: 42px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 0 2px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .letter-box.filled {
+            background-color: #ffd700;
+        }
+        
+        .letter-box:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Letras disponibles en 3 filas fijas */
+        .letters-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+            padding: 8px 4px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            height: 140px;
+            align-items: center;
+            justify-items: center;
+        }
+        
+        .letter {
+            width: 36px;
+            height: 40px;
+            background-color: #3f51b5;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+        }
+        
+        .letter:hover {
+            background-color: #5c6bc0;
+            transform: translateY(-2px);
+        }
+        
+        .letter.used {
+            background-color: #757575;
+            cursor: default;
+            opacity: 0.5;
+            transform: none;
+        }
+        
+        /* Controles */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            min-width: 85px;
+        }
+        
+        .hint-btn {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        .hint-btn:hover {
+            background-color: #f57c00;
+        }
+        
+        .hint-btn:disabled {
+            background-color: #757575;
+            cursor: not-allowed;
+        }
+        
+        .shop-btn {
+            background-color: #9c27b0;
+            color: white;
+        }
+        
+        .shop-btn:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .reset-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background-color: #d32f2f;
+        }
+        
+        /* Mensaje */
+        .message {
+            text-align: center;
+            font-size: 0.9rem;
+            min-height: 22px;
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .success {
+            background-color: rgba(76, 175, 80, 0.3);
+            color: #a5d6a7;
+        }
+        
+        .error {
+            background-color: rgba(244, 67, 54, 0.3);
+            color: #ffabab;
+        }
+        
+        /* Modal de nivel completado */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .level-complete {
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ffd700;
+            animation: popIn 0.5s;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .level-complete h2 {
+            color: #ffd700;
+            margin-bottom: 12px;
+            font-size: 1.8rem;
+        }
+        
+        .level-complete p {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+        
+        .next-btn {
+            background-color: #2196f3;
+            color: white;
+            font-size: 1rem;
+            padding: 10px 25px;
+            margin-top: 8px;
+        }
+        
+        .next-btn:hover {
+            background-color: #1976d2;
+        }
+        
+        /* Modal de juego completado */
+        .game-completed {
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ffd700;
+            animation: popIn 0.5s;
+        }
+        
+        .game-completed h2 {
+            color: #ffd700;
+            margin-bottom: 12px;
+            font-size: 1.8rem;
+        }
+        
+        .game-completed p {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        /* Modal de tienda */
+        .shop-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .shop-content {
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ffd700;
+        }
+        
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .shop-title {
+            color: #ffd700;
+            font-size: 1.6rem;
+        }
+        
+        .close-shop {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .shop-item {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .item-info h3 {
+            color: #ffd700;
+            margin-bottom: 4px;
+            font-size: 1.1rem;
+        }
+        
+        .item-info p {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        
+        .buy-btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .buy-btn:disabled {
+            background-color: #757575;
+            cursor: not-allowed;
+        }
+        
+        /* Modal de imagen en pantalla completa */
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            display: none;
+        }
+        
+        .full-image {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+        }
+        
+        .close-image {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Indicador de carga */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            font-size: 1.3rem;
+            color: #ffd700;
+        }
+        
+        /* Para pantallas más grandes */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 500px;
+            }
+            
+            .photo {
+                height: 180px;
+            }
+            
+            .letter-box {
+                min-width: 40px;
+                height: 48px;
+                font-size: 1.6rem;
+            }
+            
+            .letter {
+                width: 40px;
+                height: 45px;
+                font-size: 1.5rem;
+            }
+            
+            .letters-container {
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                gap: 6px;
+            }
+        }
+        
+        /* Para pantallas muy pequeñas */
+        @media (max-width: 320px) {
+            .photo {
+                height: 115px;
+            }
+            
+            .letter-box, .letter {
+                min-width: 32px;
+                height: 38px;
+                font-size: 1.2rem;
+            }
+            
+            .letter {
+                width: 32px;
+                height: 38px;
+            }
+            
+            .letters-container {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                height: 160px;
+                gap: 4px;
+            }
+            
+            button {
+                padding: 7px 12px;
+                font-size: 0.85rem;
+                min-width: 75px;
+            }
+            
+            .compact-header {
+                padding: 5px 8px;
+            }
+            
+            .game-title {
+                font-size: 1.1rem;
+            }
+            
+            .stats-container {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">Cargando...</div>
+    
+    <div class="container">
+        <!-- Encabezado compacto -->
+        <div class="compact-header">
+            <div class="game-title">4 Fotos 1 Palabra</div>
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-label">NIVEL</div>
+                    <div class="stat-value" id="level">1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">PISTAS</div>
+                    <div class="stat-value" id="hints">3</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">PUNTOS</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenedor de fotos 2x2 -->
+        <div class="photos-container">
+            <div class="photo" id="photo1-container">
+                <div class="photo-number">1</div>
+                <img id="photo1" alt="Imagen 1">
+            </div>
+            <div class="photo" id="photo2-container">
+                <div class="photo-number">2</div>
+                <img id="photo2" alt="Imagen 2">
+            </div>
+            <div class="photo" id="photo3-container">
+                <div class="photo-number">3</div>
+                <img id="photo3" alt="Imagen 3">
+            </div>
+            <div class="photo" id="photo4-container">
+                <div class="photo-number">4</div>
+                <img id="photo4" alt="Imagen 4">
+            </div>
+        </div>
+        
+        <!-- Área de respuesta -->
+        <div class="answer-container">
+            <div class="answer-display" id="answer-display">
+                <!-- Las casillas para la palabra se generan aquí -->
+            </div>
+            
+            <div class="letters-container" id="letters-container">
+                <!-- Las letras disponibles se generan aquí -->
+            </div>
+            
+            <div class="message" id="message"></div>
+            
+            <div class="controls">
+                <button class="hint-btn" id="hint-btn">Pista</button>
+                <button class="shop-btn" id="shop-btn">Tienda</button>
+                <button class="reset-btn" id="reset-btn">Reiniciar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de nivel completado (centrado) -->
+    <div class="modal-overlay" id="level-complete-modal">
+        <div class="level-complete">
+            <h2>¡Nivel Completado!</h2>
+            <p>Has encontrado la palabra correcta: <span id="correct-word"></span></p>
+            <p>¡Ganaste <span id="points-earned">50</span> puntos!</p>
+            <button class="next-btn" id="next-btn">Siguiente Nivel</button>
+        </div>
+    </div>
+    
+    <!-- Modal de juego completado -->
+    <div class="modal-overlay" id="game-completed-modal">
+        <div class="game-completed">
+            <h2>¡Felicidades!</h2>
+            <p>Has completado todos los niveles disponibles.</p>
+            <p>Tu puntuación final: <span id="final-score">0</span> puntos</p>
+            <p>¡Descarga la próxima actualización para más niveles!</p>
+        </div>
+    </div>
+    
+    <!-- Modal de tienda -->
+    <div class="shop-modal" id="shop-modal">
+        <div class="shop-content">
+            <div class="shop-header">
+                <h2 class="shop-title">Tienda</h2>
+                <button class="close-shop" id="close-shop">×</button>
+            </div>
+            <p style="margin-bottom: 20px; text-align: center;">Tienes <strong id="shop-score">0</strong> puntos</p>
+            
+            <div class="shop-item">
+                <div class="item-info">
+                    <h3>Paquete de Pistas</h3>
+                    <p>Compra 3 pistas adicionales</p>
+                </div>
+                <button class="buy-btn" id="buy-hints-btn" data-cost="100">100 puntos</button>
+            </div>
+            
+            <div class="shop-item">
+                <div class="item-info">
+                    <h3>Paquete Grande de Pistas</h3>
+                    <p>Compra 10 pistas adicionales</p>
+                </div>
+                <button class="buy-btn" id="buy-big-hints-btn" data-cost="300">300 puntos</button>
+            </div>
+            
+            <div class="shop-item">
+                <div class="item-info">
+                    <h3>Revelar Letra</h3>
+                    <p>Revela una letra aleatoria de la palabra</p>
+                </div>
+                <button class="buy-btn" id="buy-reveal-btn" data-cost="50">50 puntos</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de imagen en pantalla completa -->
+    <div class="image-modal" id="image-modal">
+        <button class="close-image" id="close-image">×</button>
+        <img class="full-image" id="full-image" alt="Imagen en pantalla completa">
+    </div>
+
+    
+    <script src="script.js"></script>
+       
+   
+</body>
+</html>
